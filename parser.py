@@ -1,8 +1,9 @@
-import time
-import requests
 import configparser
-from bs4 import BeautifulSoup
+import logging
+import time
 
+import requests
+from bs4 import BeautifulSoup
 
 AVITO_URL = 'https://m.avito.ru/'
 
@@ -17,75 +18,87 @@ def get_parser_config():
     return get_parser_config()
 
 
-def downloadHTLM(url) -> BeautifulSoup:
+def download_html(url) -> BeautifulSoup:
     html = requests.get(url)
-    htmlText = html.text
-    soup = BeautifulSoup(htmlText, 'lxml')
+    html_text = html.text
+    soup = BeautifulSoup(html_text, 'html5lib')
     return soup
 
 
-def getAllAdds(soup) -> list:
+def get_all_ads(soup) -> list:
     articles = soup.find_all('article', class_='b-item js-catalog-item-enum ')
     adds = []
     for add in articles:
-        addLink = add.find('a').get('href')
-        adds.append(addLink)
+        add_link = add.find('a').get('href')
+        adds.append(add_link)
     return adds
 
 
-def getPhone(url) -> str:
-    soup = downloadHTLM(url)
-    link = findButtonHref(soup)
-    return makeRequest(link)
+def get_phone(url) -> str:
+    soup = download_html(url)
+    link = find_button_href(soup)
+    return make_request(link)
 
 
-def findButtonHref(soup) -> str:
-    buttonA = soup.find('a', attrs='person-action')
-    buttonHref = buttonA.get('href')
-    return buttonHref
+def find_button_href(soup) -> str:
+    button_a = soup.find('a', attrs='person-action')
+    button_href = button_a.get('href')
+    return button_href
 
 
-def makeRequest(link) -> str:
+def make_request(link) -> str:
     url = AVITO_URL + link
     headers = {
         'Referer': url
     }
 
-    urlForRequest = f'{url}?async'
-    request = requests.get(urlForRequest, headers=headers)
+    url_for_request = f'{url}?async'
+    request = requests.get(url_for_request, headers=headers)
     answer = request.text
-    phone = getPhoneNumberFromAnswer(answer)
+    phone = get_phone_number_from_answer(answer)
     return phone
 
 
-def getPhoneNumberFromAnswer(answer) -> str:
+def get_phone_number_from_answer(answer) -> str:
     text = answer.replace('"', ' ').replace('{', '').replace('}', ' ').strip()
-    textList = text.split(':')
-    phone = textList[1].strip()
+    text_list = text.split(':')
+    phone = text_list[1].strip()
     return phone
 
 
 def main(start, end):
-    urlMain = '{}?user=2'.format(get_parser_config()['scan_url'])
-    for i in range(start, end):
-        URL = urlMain + '&p=' + str(i)
-        try:
-            mainSoup = downloadHTLM(URL)
-            adds = getAllAdds(mainSoup)
-            for j, add in enumerate(adds):
-                time.sleep(15)
-                url = AVITO_URL + add
-                phone = getPhone(url)
+    logging.info('Parsing {} ads (from {} to {})'.format(end - start, start, end))
 
-                with open(get_parser_config()['out_file'], 'a') as f:
-                    f.write(phone + ' ' + url + '\n')
-                print(phone, url, '{} / {}'.format(j + 1, len(adds)), i)
+    file = open(get_parser_config()['out_file'], 'a')
+
+    url = '{}?user=2'.format(get_parser_config()['scan_url'])
+    p = 0
+    while start < end:
+        p += 1
+        page_url = url + '&p=' + str(p)
+
+        try:
+            main_soup = download_html(url)
+
+            ads = get_all_ads(main_soup)
+
+            for j, ad in enumerate(ads[:end - start]):
+                time.sleep(int(get_parser_config()['delay']))
+                full_url = AVITO_URL + ad
+                phone = get_phone(full_url)
+
+                file.write('{}. {} {}\n'.format(start + j + 1, phone, full_url))
+                logging.info('{} {} {} / {}'.format(phone, page_url, start + j + 1, end))
+
+            start += len(ads)
         except Exception as e:
-            import logging
-            logging.getLogger().exception(e)
-            time.sleep(60)
-            main(i, end)
+            logging.exception(e)
+            time.sleep(int(get_parser_config()['error_delay']))
+            main(p, end)
+
+    file.close()
 
 
 if __name__ == '__main__':
-    main(1, 2)
+    logging.basicConfig(level=logging.INFO)
+    main(int(get_parser_config()['from']), int(get_parser_config()['to']))
