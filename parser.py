@@ -1,9 +1,20 @@
 import time
 import requests
+import configparser
 from bs4 import BeautifulSoup
 
 
 AVITO_URL = 'https://m.avito.ru/'
+
+
+def get_parser_config():
+    if hasattr(get_parser_config, 'conf'):
+        return getattr(get_parser_config, 'conf')
+
+    conf = configparser.RawConfigParser()
+    conf.read(['parser.properties'])
+    setattr(get_parser_config, 'conf', conf['parser'])
+    return get_parser_config()
 
 
 def downloadHTLM(url) -> BeautifulSoup:
@@ -55,7 +66,7 @@ def getPhoneNumberFromAnswer(answer) -> str:
 
 
 def main(start, end):
-    urlMain = 'https://m.avito.ru/engels/komnaty?user=2'
+    urlMain = '{}?user=2'.format(get_parser_config()['scan_url'])
     for i in range(start, end):
         URL = urlMain + '&p=' + str(i)
         try:
@@ -65,9 +76,8 @@ def main(start, end):
                 time.sleep(15)
                 url = AVITO_URL + add
                 phone = getPhone(url)
-                line = phone + '\n'
 
-                with open('result.txt', 'a') as f:
+                with open(get_parser_config()['out_file'], 'a') as f:
                     f.write(phone + ' ' + url + '\n')
                 print(phone, url, '{} / {}'.format(j + 1, len(adds)), i)
         except Exception as e:
