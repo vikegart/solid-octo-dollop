@@ -14,6 +14,6 @@ Login - admin; password - admin
 
 `/start?url=[Avito url to parse (e.g. https://m.avito.ru/engels/komnaty)]&count=[count of ads to parse]` - start parser
 
-`/stop/` - stop parser
+`/stop` - stop parser
 
-`/clear/` - clear all phone numbers
+`/clear` - clear all phone numbers
