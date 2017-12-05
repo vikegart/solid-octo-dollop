@@ -53,7 +53,7 @@ class Controller:
     @auth.login_required
     def clear():
         Parser.clear()
-        return '\n'.join(Parser.parsed)
+        return 'Ok'
 
     @classmethod
     def run(cls, **kwargs):

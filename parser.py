@@ -17,14 +17,14 @@ class Parser:
     task = Thread()
 
     @classmethod
-    def _download_html(cls, url) -> BeautifulSoup:
+    def _download_html(cls, url):
         html = requests.get(url)
         html_text = html.text
         soup = BeautifulSoup(html_text, 'html5lib')
         return soup
 
     @classmethod
-    def _get_all_ads(cls, soup) -> list:
+    def _get_all_ads(cls, soup):
         articles = soup.find_all('article', class_='b-item js-catalog-item-enum ')
         adds = []
         for add in articles:
@@ -33,19 +33,19 @@ class Parser:
         return adds
 
     @classmethod
-    def _get_phone(cls, url) -> str:
+    def _get_phone(cls, url):
         soup = cls._download_html(url)
         link = cls._find_button_href(soup)
         return cls._make_request(link)
 
     @classmethod
-    def _find_button_href(cls, soup) -> str:
+    def _find_button_href(cls, soup):
         button_a = soup.find('a', attrs='person-action')
         button_href = button_a.get('href')
         return button_href
 
     @classmethod
-    def _make_request(cls, link) -> str:
+    def _make_request(cls, link):
         url = AVITO_URL + link
         headers = {
             'Referer': url
@@ -58,7 +58,7 @@ class Parser:
         return phone
 
     @classmethod
-    def _get_phone_number_from_answer(cls, answer) -> str:
+    def _get_phone_number_from_answer(cls, answer):
         text = answer.replace('"', ' ').replace('{', '').replace('}', ' ').strip()
         text_list = text.split(':')
         phone = text_list[1].strip()
@@ -108,8 +108,3 @@ class Parser:
     @classmethod
     def clear(cls):
         cls.parsed.clear()
-
-    @classmethod
-    def load(cls, file):
-        with open(file, 'r') as f:
-            cls.parsed.update(f.readlines())
