@@ -70,16 +70,20 @@ class Parser:
         for i in range(page_count):
             page_url = cls.url + '?p=' + str(i + 1)
 
-            main_soup = cls._download_html(page_url)
-            ads = cls._get_all_ads(main_soup)
+            try:
+                main_soup = cls._download_html(page_url)
+                ads = cls._get_all_ads(main_soup)
 
-            for _, ad in enumerate(ads[:cls.count - cls.current]):
-                cls.current += 1
-                full_url = AVITO_URL + ad
-                phone = cls._get_phone(full_url)
-                cls.parsed.add(phone)
-                logging.info('{} {} {} / {}'.format(phone, page_url, cls.current, cls.count))
-
+                for _, ad in enumerate(ads[:cls.count - cls.current]):
+                    cls.current += 1
+                    full_url = AVITO_URL + ad
+                    phone = cls._get_phone(full_url)
+                    cls.parsed.add(phone)
+                    logging.info('{} {} {} / {}'.format(phone, page_url, cls.current, cls.count))
+            except Exception as e:
+                logging.exception(e)
+                time.sleep(60)
+            finally:
                 time.sleep(randint(30, 60))
 
     @classmethod
