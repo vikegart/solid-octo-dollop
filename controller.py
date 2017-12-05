@@ -2,7 +2,7 @@ from flask import Flask
 from flask import request
 from flask_httpauth import HTTPBasicAuth
 
-from parser import Parser, ParserBadRequestError
+from parser import Parser, ParserRunningError, ParserNotRunningError
 
 
 class Controller:
@@ -10,9 +10,14 @@ class Controller:
     auth = HTTPBasicAuth()
 
     @staticmethod
-    @app.errorhandler(ParserBadRequestError)
-    def error_handler(error):
-        return 'Error: {}'.format(error), 400
+    @app.errorhandler(ParserRunningError)
+    def parser_running_error_handler(_):
+        return "You can't do this action, when parser is running", 400
+
+    @staticmethod
+    @app.errorhandler(ParserNotRunningError)
+    def parser_running_error_handler(_):
+        return "You can't do this action, when parser isn't running", 400
 
     @staticmethod
     @auth.get_password
@@ -25,7 +30,7 @@ class Controller:
     @app.route('/')
     @auth.login_required
     def index():
-        return '{}/{}'.format(Parser.current, Parser.count)
+        return '{}/{}'.format(*Parser.get_status())
 
     @staticmethod
     @app.route('/stop')

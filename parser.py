@@ -11,7 +11,11 @@ AVITO_URL = 'https://m.avito.ru/'
 AD_PER_PAGE = 20
 
 
-class ParserBadRequestError(Exception):
+class ParserRunningError(Exception):
+    pass
+
+
+class ParserNotRunningError(Exception):
     pass
 
 
@@ -104,18 +108,25 @@ class Parser:
             cls.task.daemon = True
             cls.task.start()
         else:
-            raise ParserBadRequestError('parser is already running')
+            raise ParserRunningError()
 
     @classmethod
     def stop_parsing(cls):
         if cls.parser_running():
             cls.task = Thread()
         else:
-            raise ParserBadRequestError('parser isn\'t running')
+            raise ParserNotRunningError()
+
+    @classmethod
+    def get_status(cls):
+        if cls.parser_running():
+            return cls.current, cls.count
+        else:
+            raise ParserNotRunningError()
 
     @classmethod
     def clear(cls):
         if cls.parser_running():
-            raise ParserBadRequestError('you can\'t clear output while parser is running')
+            raise ParserRunningError()
         else:
             cls.parsed.clear()
