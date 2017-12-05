@@ -1,7 +1,7 @@
 PYTHON=/usr/bin/python3.6
 
 all:
-	$(PYTHON) parser.py
+	$(PYTHON) main.py
 
 clean:
 	rm result.txt
