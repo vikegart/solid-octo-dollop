@@ -4,6 +4,9 @@ from flask_httpauth import HTTPBasicAuth
 
 from parser import Parser, ParserError
 
+SUCCESS_STATUS = 'success'
+ERROR_STATUS = 'error'
+
 
 class Controller:
     app = Flask(__name__)
@@ -12,7 +15,8 @@ class Controller:
     @staticmethod
     @app.errorhandler(ParserError)
     def parser_running_error_handler(e):
-        return jsonify(error=dict(
+        return jsonify(status=ERROR_STATUS,
+                       error=dict(
                            code=e.code,
                            message=e.message)
                        ), e.code
@@ -29,34 +33,34 @@ class Controller:
     @auth.login_required
     def index():
         current, end = Parser.get_status()
-        return jsonify(current=current, end=end)
+        return jsonify(status=SUCCESS_STATUS, current=current, end=end)
 
     @staticmethod
     @app.route('/stop')
     @auth.login_required
     def stop():
         Parser.stop_parsing()
-        return '', 200
+        return jsonify(status=SUCCESS_STATUS)
 
     @staticmethod
     @app.route('/start')
     @auth.login_required
     def start():
         Parser.start_parsing(request.args.get('url'), int(request.args.get('count')))
-        return '', 200
+        return jsonify(status=SUCCESS_STATUS)
 
     @staticmethod
     @app.route('/result')
     @auth.login_required
     def result():
-        return jsonify(parsed=list(Parser.parsed))
+        return jsonify(status=SUCCESS_STATUS, parsed=list(Parser.parsed))
 
     @staticmethod
     @app.route('/clear')
     @auth.login_required
     def clear():
         Parser.clear()
-        return '', 200
+        return jsonify(status=SUCCESS_STATUS)
 
     @classmethod
     def run(cls, **kwargs):
