@@ -3,6 +3,9 @@ import time
 from random import randint
 from threading import Thread
 
+import urllib.parse as urlparse
+from urllib.parse import urlencode
+
 import requests
 from bs4 import BeautifulSoup
 from math import ceil
@@ -97,7 +100,14 @@ class Parser:
     def _parse(cls):
         page_count = int(ceil(cls.count / AD_PER_PAGE))
         for i in range(page_count):
-            page_url = cls.url + '?p=' + str(i + 1)
+            params = {'p': i}
+
+            url_parts = list(urlparse.urlparse(cls.url))
+            query = dict(urlparse.parse_qsl(url_parts[4]))
+            query.update(params)
+            url_parts[4] = urlencode(query)
+
+            page_url = urlparse.urlunparse(url_parts)
 
             ads = cls._get_all_ads(page_url)
 
