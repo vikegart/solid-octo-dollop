@@ -1,8 +1,8 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask import request
 from flask_httpauth import HTTPBasicAuth
 
-from parser import Parser, ParserRunningError, ParserNotRunningError
+from parser import Parser, ParserError
 
 
 class Controller:
@@ -10,14 +10,12 @@ class Controller:
     auth = HTTPBasicAuth()
 
     @staticmethod
-    @app.errorhandler(ParserRunningError)
-    def parser_running_error_handler(_):
-        return "You can't do this action, when parser is running", 400
-
-    @staticmethod
-    @app.errorhandler(ParserNotRunningError)
-    def parser_running_error_handler(_):
-        return "You can't do this action, when parser isn't running", 400
+    @app.errorhandler(ParserError)
+    def parser_running_error_handler(e):
+        return jsonify(error=dict(
+                           code=e.code,
+                           message=e.message)
+                       ), e.code
 
     @staticmethod
     @auth.get_password
@@ -30,34 +28,35 @@ class Controller:
     @app.route('/')
     @auth.login_required
     def index():
-        return '{}/{}'.format(*Parser.get_status())
+        current, end = Parser.get_status()
+        return jsonify(current=current, end=end)
 
     @staticmethod
     @app.route('/stop')
     @auth.login_required
     def stop():
         Parser.stop_parsing()
-        return 'Ok'
+        return '', 200
 
     @staticmethod
     @app.route('/start')
     @auth.login_required
     def start():
         Parser.start_parsing(request.args.get('url'), int(request.args.get('count')))
-        return 'Ok'
+        return '', 200
 
     @staticmethod
     @app.route('/result')
     @auth.login_required
     def result():
-        return '<br/>'.join(Parser.parsed)
+        return jsonify(parsed=list(Parser.parsed))
 
     @staticmethod
     @app.route('/clear')
     @auth.login_required
     def clear():
         Parser.clear()
-        return 'Ok'
+        return '', 200
 
     @classmethod
     def run(cls, **kwargs):

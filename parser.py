@@ -11,12 +11,17 @@ AVITO_URL = 'https://m.avito.ru/'
 AD_PER_PAGE = 20
 
 
-class ParserRunningError(Exception):
-    pass
+class ParserError(Exception):
+    message = 'No message has been provided'
+    code = 400
 
 
-class ParserNotRunningError(Exception):
-    pass
+class ParserRunningError(ParserError):
+    message = "You can't do this action, when parser is running"
+
+
+class ParserNotRunningError(ParserError):
+    message = "You can't do this action, when parser isn't running"
 
 
 class Parser:
