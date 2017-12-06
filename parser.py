@@ -26,25 +26,41 @@ class Parser:
 
     @classmethod
     def _download_html(cls, url):
-        html = requests.get(url)
-        html_text = html.text
-        soup = BeautifulSoup(html_text, 'html5lib')
-        return soup
+        try:
+            html = requests.get(url)
+            html_text = html.text
+            soup = BeautifulSoup(html_text, 'html5lib')
+            return soup
+        except Exception as e:
+            logging.exception(e)
+            time.sleep(60)
+            return cls._download_html(url)
 
     @classmethod
-    def _get_all_ads(cls, soup):
+    def _get_all_ads(cls, page_url):
+        soup = cls._download_html(page_url)
         articles = soup.find_all('article', class_='b-item js-catalog-item-enum ')
-        adds = []
-        for add in articles:
-            add_link = add.find('a').get('href')
-            adds.append(add_link)
-        return adds
+        if articles:
+            ads = []
+            for ad in articles:
+                ad_link = ad.find('a').get('href')
+                ads.append(ad_link)
+            return ads
+        else:
+            logging.error('Failed to parse articles')
+            time.sleep(60)
+            return cls._get_all_ads(page_url)
 
     @classmethod
     def _get_phone(cls, url):
         soup = cls._download_html(url)
-        link = cls._find_button_href(soup)
-        return cls._make_request(link)
+        try:
+            link = cls._find_button_href(soup)
+            return cls._make_request(link)
+        except Exception as e:
+            logging.exception(e)
+            time.sleep(60)
+            return cls._get_phone(url)
 
     @classmethod
     def _find_button_href(cls, soup):
@@ -78,20 +94,14 @@ class Parser:
         for i in range(page_count):
             page_url = cls.url + '?p=' + str(i + 1)
 
-            try:
-                main_soup = cls._download_html(page_url)
-                ads = cls._get_all_ads(main_soup)
+            ads = cls._get_all_ads(page_url)
 
-                for _, ad in enumerate(ads[:cls.count - cls.current]):
-                    cls.current += 1
-                    full_url = AVITO_URL + ad
-                    phone = cls._get_phone(full_url)
-                    cls.parsed.add(phone)
-                    logging.info('{} {} {} / {}'.format(phone, page_url, cls.current, cls.count))
-            except Exception as e:
-                logging.exception(e)
-                time.sleep(60)
-            finally:
+            for _, ad in enumerate(ads[:cls.count - cls.current]):
+                cls.current += 1
+                full_url = AVITO_URL + ad
+                phone = cls._get_phone(full_url)
+                cls.parsed.add(phone)
+                logging.info('{} {} {} / {}'.format(phone, page_url, cls.current, cls.count))
                 time.sleep(randint(30, 60))
 
     @classmethod
