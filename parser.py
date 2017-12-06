@@ -100,7 +100,7 @@ class Parser:
     def _parse(cls):
         page_count = int(ceil(cls.count / AD_PER_PAGE))
         for i in range(page_count):
-            params = {'p': i}
+            params = {'p': i + 1}
 
             url_parts = list(urlparse.urlparse(cls.url))
             query = dict(urlparse.parse_qsl(url_parts[4]))
@@ -112,12 +112,13 @@ class Parser:
             ads = cls._get_all_ads(page_url)
 
             for _, ad in enumerate(ads[:cls.count - cls.current]):
-                cls.current += 1
                 full_url = AVITO_URL + ad
                 phone = cls._get_phone(full_url)
                 cls.parsed.add(phone)
-                logging.info('{} {} {} / {}'.format(phone, page_url, cls.current, cls.count))
+                logging.info('{} {} {} / {}'.format(0, page_url, cls.current, cls.count))
+
                 time.sleep(randint(30, 60))
+                cls.current += 1
 
     @classmethod
     def parser_running(cls):
