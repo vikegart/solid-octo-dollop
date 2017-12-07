@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 from flask import request
 from flask_httpauth import HTTPBasicAuth
 
-from parser import Parser, ParserError
+from parser import ParserError, Parser
 
 SUCCESS_STATUS = 'success'
 ERROR_STATUS = 'error'
@@ -53,13 +53,13 @@ class Controller:
     @app.route('/result')
     @auth.login_required
     def result():
-        return jsonify(status=SUCCESS_STATUS, parsed=list(Parser.parsed))
+        return jsonify(status=SUCCESS_STATUS, result=Parser.get_result())
 
     @staticmethod
     @app.route('/clear')
     @auth.login_required
     def clear():
-        Parser.clear()
+        Parser.clear_result()
         return jsonify(status=SUCCESS_STATUS)
 
     @classmethod
