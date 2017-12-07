@@ -110,6 +110,7 @@ class Parser:
             page_url = urlparse.urlunparse(url_parts)
 
             ads = cls._get_all_ads(page_url)
+            print(ads)
 
             for _, ad in enumerate(ads[:cls.count - cls.current]):
                 full_url = AVITO_URL + ad
@@ -117,7 +118,7 @@ class Parser:
                 cls.parsed.add(phone)
                 logging.info('{} {} {} / {}'.format(0, page_url, cls.current, cls.count))
 
-                time.sleep(randint(30, 60))
+                time.sleep(randint(10, 30))
                 cls.current += 1
 
     @classmethod
@@ -126,10 +127,10 @@ class Parser:
 
     @classmethod
     def start_parsing(cls, url, count):
-        cls.url = url
-        cls.count = count
-        cls.current = 0
         if not cls.parser_running():
+            cls.url = url
+            cls.count = count
+            cls.current = 0
             cls.task = Thread(target=cls._parse)
             cls.task.daemon = True
             cls.task.start()
