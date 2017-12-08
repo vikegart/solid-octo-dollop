@@ -9,7 +9,9 @@ ERROR_STATUS = 'error'
 
 
 class Controller:
-    app = Flask(__name__)
+    app = Flask(__name__
+                static_folder = "./dist/static",
+                template_folder = "./dist")
     auth = HTTPBasicAuth()
 
     @staticmethod
@@ -29,13 +31,19 @@ class Controller:
         return None
 
     @staticmethod
+    @app.route('/status')
+    @auth.login_required
+    def status():
+        current, end = Parser.get_status()
+        return render_template('indexOld.html', current=current, end=end)
+
+    @staticmethod
     @app.route('/')
     @auth.login_required
     def index():
-        current, end = Parser.get_status()
-        return render_template('index.html', current=current, end=end)
+        return render_template('index.html')
 
-    @staticmethod
+	@staticmethod
     @app.route('/stop')
     @auth.login_required
     def stop():
