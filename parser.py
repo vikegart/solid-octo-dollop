@@ -120,9 +120,6 @@ class ParserTask:
         self._thread.start()
 
     def stop(self):
-        # noinspection PyProtectedMember
-        # It's very bad practise, but idk what to do
-        self._thread._stop()
         self._alive = False
 
     def running(self):

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from flask import request
 from flask_httpauth import HTTPBasicAuth
 
@@ -33,7 +33,7 @@ class Controller:
     @auth.login_required
     def index():
         current, end = Parser.get_status()
-        return jsonify(status=SUCCESS_STATUS, current=current, end=end)
+        return render_template('index.html', current=current, end=end)
 
     @staticmethod
     @app.route('/stop')
