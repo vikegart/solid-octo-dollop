@@ -43,7 +43,7 @@ class Controller:
     def index():
         return render_template('index.html')
 
-	@staticmethod
+	  @staticmethod
     @app.route('/stop')
     @auth.login_required
     def stop():
