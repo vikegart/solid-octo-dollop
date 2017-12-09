@@ -29,9 +29,9 @@ class Controller:
         return None
 
     @staticmethod
-    @app.route('/')
+    @app.route('/status')
     @auth.login_required
-    def index():
+    def status():
         current, end = Parser.get_status()
         return jsonify(status=SUCCESS_STATUS, current=current, end=end)
 
