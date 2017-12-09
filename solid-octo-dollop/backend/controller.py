@@ -33,7 +33,7 @@ class Controller:
     @auth.login_required
     def index():
         current, end = Parser.get_status()
-        return render_template('index.html', current=current, end=end)
+        return jsonify(status=SUCCESS_STATUS, current=current, end=end)
 
     @staticmethod
     @app.route('/stop')

@@ -4,7 +4,7 @@
       <v-container fluid>
         <v-slide-y-transition mode="out-in">
           <v-layout column align-center>
-            <img src="/static/v.png" alt="Vuetify.js" class="mb-5" />
+            <img src="static/logo.png" alt="Vuetify.js" class="mb-5" />
             <blockquote>
               solid-octo-dollop
               <footer>
@@ -85,7 +85,8 @@
         if (this.$refs.form.validate()) {
 			console.log(this.urlParse);
 			console.log(this.countAds);
-			location.href = '/api/start?url=' + this.urlParse + '&count=' + this.countAds;
+			// TODO REWRITE WITH CROSS-DOMAIN AJAX REQUESTS
+			location.href = 'http://185.143.173.66:5000/start?url=' + this.urlParse + '&count=' + this.countAds;
         }
       },
       clear () {
