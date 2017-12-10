@@ -9,7 +9,9 @@ ERROR_STATUS = 'error'
 
 
 class Controller:
-    app = Flask(__name__)
+    app = Flask(__name__,
+                static_folder = "../frontend/dist/static",
+                template_folder = "../frontend/dist")
     auth = HTTPBasicAuth()
 
     @staticmethod
@@ -27,6 +29,12 @@ class Controller:
         if username == 'admin':
             return 'admin'
         return None
+    
+    @staticmethod
+    @app.route('/')
+    @auth.login_required
+    def mainpage():
+        return render_template('index.html')
 
     @staticmethod
     @app.route('/status')
