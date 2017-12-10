@@ -1,7 +1,5 @@
-solid_octo_dollop/frontend/.DS_Store
-solid_octo_dollop/frontend/node_modules/
-solid_octo_dollop/frontend/dist/
-solid_octo_dollop/frontend/package-lock.json
+frontend/node_modules/
+frontend/package-lock.json
 
 *.log
 

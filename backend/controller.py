@@ -10,8 +10,8 @@ ERROR_STATUS = 'error'
 
 class Controller:
     app = Flask(__name__,
-                static_folder = "../frontend/dist/static",
-                template_folder = "../frontend/dist")
+                static_folder="../frontend/dist/static",
+                template_folder="../frontend/dist")
     auth = HTTPBasicAuth()
 
     @staticmethod
@@ -33,7 +33,7 @@ class Controller:
     @staticmethod
     @app.route('/')
     @auth.login_required
-    def mainpage():
+    def index():
         return render_template('index.html')
 
     @staticmethod
