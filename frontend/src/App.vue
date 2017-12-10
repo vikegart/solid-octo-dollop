@@ -4,7 +4,7 @@
       <v-container fluid>
         <v-slide-y-transition mode="out-in">
           <v-layout column align-center>
-            <img src="/static/v.png" alt="Vuetify.js" class="mb-5" />
+            <img src="static/logo.png" alt="Vuetify.js" class="mb-5" />
             <blockquote>
               solid-octo-dollop
               <footer>
@@ -16,7 +16,7 @@
           </v-layout>
         </v-slide-y-transition>
       </v-container>
-	  
+
 	  <v-flex xs12 sm6 offset-sm3>
       <v-card>
         <v-form v-model="valid" ref="form" lazy-validation>
@@ -32,7 +32,7 @@
       :rules="countAdsRules"
       required
     ></v-text-field>
-    
+
     <v-btn
       @click="submit"
       :disabled="!valid"
@@ -43,8 +43,8 @@
   </v-form>
       </v-card>
     </v-flex>
-	  
-	  
+
+
     </v-content>
     <v-footer :fixed="fixed" app>
       <span>&copy; 2017</span>
@@ -85,6 +85,7 @@
         if (this.$refs.form.validate()) {
 			console.log(this.urlParse);
 			console.log(this.countAds);
+			// TODO REWRITE WITH CROSS-DOMAIN AJAX REQUESTS
 			location.href = 'http://185.143.173.66:5000/start?url=' + this.urlParse + '&count=' + this.countAds;
         }
       },
