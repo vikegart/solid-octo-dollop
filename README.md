@@ -6,7 +6,7 @@ Run in the project root:
 cd backend/
 make
 ```
-## Running front-end
+~## Running front-end~ in progress ~~
 Run in the project root:
 
 ```
