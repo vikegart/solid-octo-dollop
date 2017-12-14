@@ -37,17 +37,15 @@
               запустить парсер
             </v-btn>
             <v-btn @click="clear">очистить поля</v-btn>
-            <v-btn @click="getProgress">статус</v-btn>
           </v-form>
           <v-progress-circular
             v-bind:size="100"
             v-bind:width="15"
             v-bind:rotate="-90"
-            v-bind:value="value"
+            v-bind:value="progressValue"
             color="primary"
           >
-            {{ progress }}
-            13/135
+            {{progressCurrent}}/{{progressEnd}}
           </v-progress-circular>
         </v-card>
       </v-flex>
@@ -64,50 +62,66 @@
   export default {
     data () {
       return {
-      progress: '50',
-		  urlParse: '',
-      urlParseRules: [
-          (v) => !!v || 'Требуется ссылка',
-          (v) => /m\.avito/.test(v) || 'ссылка на моб версию!'
-      ],
-      countAds: '',
-      countAdsRules: [
-          (v) => !!v || 'Требуется количество',
-          (v) => /[0-9]/.test(v) || 'цифрами писать надо'
-      ],
-      title: 'Vuetify.js'
+        interval: {},
+        progressCurrent: '0',
+        progressEnd: '0',
+        progressValue: '0',
+        urlParse: '',
+        urlParseRules: [
+            (v) => !!v || 'Требуется ссылка',
+            (v) => /m\.avito/.test(v) || 'ссылка на моб версию!'
+        ],
+        countAds: '',
+        countAdsRules: [
+            (v) => !!v || 'Требуется количество',
+            (v) => /[0-9]/.test(v) || 'цифрами писать надо'
+        ],
+        title: 'Vuetify.js'
       }
     },
-	methods: {
+    beforeDestroy () {
+      clearInterval(this.interval)
+    },
+    mounted () {
+      this.interval = setInterval(() => {
+        this.$http.get('/api/status').then(response => {
+          // get body data
+          let progressData = JSON.parse(response.bodyText);
+          this.progressCurrent = progressData.current;
+          this.progressEnd = progressData.end;
+          let onePercent = this.progressEnd / 100;
+          this.progressValue = this.progressCurrent / onePercent;
+        }, response => {
+          console.log(' getProgress err response')
+          let progressData = JSON.parse(response.bodyText);
+          console.log('Status of getProgress: ' + progressData.status)
+          // error callback
+        });
+      }, 2000)
+    },
+	  methods: {
       submit () {
         if (this.$refs.form.validate()) {
 			console.log(this.urlParse);
 			console.log(this.countAds);
+      this.$http.get('/api/status').then(response => {
+        // get body data
+        let progressData = JSON.parse(response.bodyText);
+        console.log('progressData:' + progressData);
+        this.progressCurrent = progressData.current;
+        this.progressEnd = progressData.end;
+        let onePercent = this.progressEnd / 100;
+        this.progresValue = this.progressCurrent / onePercent;
+
+      }, response => {
+        console.log(' getProgress err response')
+        // error callback
+      });
 			location.href = '/api/start?url=' + this.urlParse + '&count=' + this.countAds;
         }
       },
       clear () {
         this.$refs.form.reset()
-      },
-      getProgress (){
-        console.log('clicked getProgress')
-        this.$http.get('/api/status').then(response => {
-          // get body data
-          this.progress = JSON.parse(response.bodyText);
-          console.log('progress|');
-          console.log(this.progress);
-          console.log('bodyText|');
-          console.log(response.bodyText);
-          console.log('body|');
-          console.log(response.body);
-
-
-        }, response => {
-          console.log(' getProgress err response')
-          // error callback
-        });
-
-
       }
     }
   }
