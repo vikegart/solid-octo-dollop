@@ -38,6 +38,16 @@
             </v-btn>
             <v-btn @click="clear">очистить поля</v-btn>
           </v-form>
+          <v-dialog v-model="dialogStartParser" max-width="500px">
+            <v-card>
+              <v-card-title>
+                <v-spacer>Парсер запущен</v-spacer>
+              </v-card-title>
+              <v-card-actions>
+                <v-btn color="primary" flat @click.stop="dialogStartParser=false">Закрыть</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
           <v-progress-circular
             v-bind:size="100"
             v-bind:width="15"
@@ -72,10 +82,11 @@
             (v) => /m\.avito/.test(v) || 'ссылка на моб версию!'
         ],
         countAds: '',
-        countAdsRules: [
+        countAdsRules: [ //TODO 14.12.17 написать валидную регулярку, чтобы были только цифры
             (v) => !!v || 'Требуется количество',
             (v) => /[0-9]/.test(v) || 'цифрами писать надо'
         ],
+        dialogStartParser: false,
         title: 'Vuetify.js'
       }
     },
@@ -102,22 +113,18 @@
 	  methods: {
       submit () {
         if (this.$refs.form.validate()) {
-			console.log(this.urlParse);
-			console.log(this.countAds);
-      this.$http.get('/api/status').then(response => {
-        // get body data
-        let progressData = JSON.parse(response.bodyText);
-        console.log('progressData:' + progressData);
-        this.progressCurrent = progressData.current;
-        this.progressEnd = progressData.end;
-        let onePercent = this.progressEnd / 100;
-        this.progresValue = this.progressCurrent / onePercent;
-
-      }, response => {
-        console.log(' getProgress err response')
-        // error callback
-      });
-			location.href = '/api/start?url=' + this.urlParse + '&count=' + this.countAds;
+          console.log(this.urlParse);
+          console.log(this.countAds);
+          let postUrl = '/api/start?url=' + this.urlParse + '&count=' + this.countAds;
+          this.$http.get(postUrl).then(response => {
+            let startData = JSON.parse(response.bodyText);
+            console.log(startData);
+            console.log('парсер был запущен успешно');
+            this.dialogStartParser = true;
+            this.$refs.form.reset()
+          }, response => {
+            console.log('error starting parser')
+          });
         }
       },
       clear () {
