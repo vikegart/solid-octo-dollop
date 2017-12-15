@@ -1,6 +1,6 @@
 # y
 
-> web interface for avito parser https://github.com/dvec/solid-octo-dollop
+> web interface for avito parser 
 
 ## Build Setup
 
